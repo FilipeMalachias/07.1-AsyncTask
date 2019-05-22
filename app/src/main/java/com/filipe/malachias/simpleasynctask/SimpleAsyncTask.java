@@ -6,23 +6,15 @@ import android.widget.TextView;
 import java.lang.ref.WeakReference;
 import java.util.Random;
 
-public class SimpleAsyncTask extends AsyncTask<Void,Void, String> {
+public class SimpleAsyncTask extends AsyncTask<Void, Integer, String> {
 
     // The TextView where we will show results
     private WeakReference<TextView> mTextView;
 
-    // Constructor that provides a reference to the TextView from the MainActivity
-    SimpleAsyncTask(TextView tv) {
+    public SimpleAsyncTask(TextView tv) {
         mTextView = new WeakReference<>(tv);
     }
 
-    /**
-     * Runs on the background thread.
-     *
-     * @param voids No parameters in this use case.
-     * @return Returns the string including the amount of time that
-     * the background thread slept.
-     */
     @Override
     protected String doInBackground(Void... voids) {
 
@@ -35,20 +27,27 @@ public class SimpleAsyncTask extends AsyncTask<Void,Void, String> {
         int s = n * 200;
 
         // Sleep for the random amount of time.
-        try {
-            Thread.sleep(s);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        int seconds = 5;
+        for (int i = 0; i < seconds; i++)
+            try {
+                Thread.sleep(s);
+                publishProgress(( i + 1) * 100 / seconds);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
         // Return a String result.
         return "Awake at last after sleeping for " + s + " milliseconds!";
     }
 
-    /**
-     * Does something with the result on the UI thread; in this case
-     * updates the TextView.
-     */
+    @Override
+    protected void onProgressUpdate(Integer ... values) {
+        //super.onProgressUpdate(values);
+        // gets called during the background mark process (by publicProgress();)
+        mTextView.get().setText("\nCompleted: " + values[0] + "%");
+
+    }
+
     protected void onPostExecute(String result) {
         mTextView.get().setText(result);
     }
